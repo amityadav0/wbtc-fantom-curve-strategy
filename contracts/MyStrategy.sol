@@ -10,6 +10,7 @@ import "../deps/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol
 import "../deps/@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
 
 import "../interfaces/badger/IController.sol";
+import "../interfaces/uniswap/IUniswapRouterV2.sol";
 
 import {BaseStrategy} from "../deps/BaseStrategy.sol";
 
@@ -19,6 +20,14 @@ interface IBeefyVaultV6 {
     function withdraw(uint256 shares) external;
 
     function want() external pure returns (address);
+}
+
+interface ICurveRewardGauge {
+    function deposit(uint256 amount) external;
+
+    function withdraw(uint256 shares) external;
+
+    function claim_rewards() external;
 }
 
 contract MyStrategy is BaseStrategy {
@@ -34,6 +43,12 @@ contract MyStrategy is BaseStrategy {
         0x97927aBfE1aBBE5429cBe79260B290222fC9fbba;
     address public constant MOO_WBTC =
         0x97927aBfE1aBBE5429cBe79260B290222fC9fbba;
+    address public constant CRV = 0x1e4f97b9f9f913c46f1632781732927b9019c68b;
+
+    address public constant FANTOM_CURVE_BTC_GAUGE =
+        0xbdff0c27dd073c119ebcb1299a68a6a92ae607f0;
+    address public constant SPOOKYSWAP_ROUTER =
+        0xf491e7b69e4244ad4002bc14e878a34207e38c29;
 
     // Used to signal to the Badger Tree that rewards where sent to it
     event TreeDistribution(
@@ -69,14 +84,17 @@ contract MyStrategy is BaseStrategy {
         withdrawalFee = _feeConfig[2];
 
         /// @dev do one off approvals here
-        // IERC20Upgradeable(want).safeApprove(gauge, type(uint256).max);
+        IERC20Upgradeable(want).safeApprove(
+            FANTOM_CURVE_BTC_GAUGE,
+            type(uint256).max
+        );
     }
 
     /// ===== View Functions =====
 
     // @dev Specify the name of the strategy
     function getName() external pure override returns (string memory) {
-        return "StrategyName";
+        return "Fantom-renBTC/wBTC-curve-strategy";
     }
 
     // @dev Specify the version of the Strategy, for upgrades
@@ -126,12 +144,12 @@ contract MyStrategy is BaseStrategy {
     /// @notice When this function is called, the controller has already sent want to this
     /// @notice Just get the current balance and then invest accordingly
     function _deposit(uint256 _amount) internal override {
-        IBeefyVaultV6(BEEFY_VAULT).deposit(_amount);
+        ICurveRewardGauge(FANTOM_CURVE_BTC_GAUGE).deposit(_amount);
     }
 
     /// @dev utility function to withdraw everything for migration
     function _withdrawAll() internal override {
-        IBeefyVaultV6(BEEFY_VAULT).withdraw(balanceOfPool());
+        ICurveRewardGauge(FANTOM_CURVE_BTC_GAUGE).withdraw(balanceOfPool());
     }
 
     /// @dev withdraw the specified amount of want, liquidate from lpComponent to want, paying off any necessary debt for the conversion
@@ -140,7 +158,11 @@ contract MyStrategy is BaseStrategy {
         override
         returns (uint256)
     {
-        IBeefyVaultV6(BEEFY_VAULT).withdraw(_amount);
+        if (_amount > balanceOfPool()) {
+            _amount = balanceOfPool();
+        }
+
+        ICurveRewardGauge(FANTOM_CURVE_BTC_GAUGE).withdraw(_amount);
         return _amount;
     }
 
@@ -151,6 +173,25 @@ contract MyStrategy is BaseStrategy {
         uint256 _before = IERC20Upgradeable(want).balanceOf(address(this));
 
         // Write your code here
+        ICurveRewardGauge(FANTOM_CURVE_BTC_GAUGE).claim_rewards();
+
+        uint256 earned_crv = IERC20Upgradeable(CRV).balanceOf(address(this));
+        if (earned_crv > 0) {
+            // swap crv to wFTM
+            IUniswapRouterV2(SPOOKYSWAP_ROUTER).swapExactTokensForTokens(
+                earned_crv,
+                0,
+                [reward, CRV],
+                address(this),
+                now
+            );
+        }
+
+        uint256 earned_fantom =
+            IERC20Upgradeable(reward).balanceOf(address(this));
+        if (earned_fantom > 0) {
+            // swap wFTM to BTC
+        }
 
         uint256 earned =
             IERC20Upgradeable(want).balanceOf(address(this)).sub(_before);

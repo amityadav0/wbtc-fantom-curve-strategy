@@ -1,11 +1,11 @@
 ## Ideally, they have one file with the settings for the strat and deployment
 ## This file would allow them to configure so they can test, deploy and interact with the strategy
 
-BADGER_DEV_MULTISIG = "0x9813F8B14ea30a086aFCE6Fa0f48f10c1A7d8Ac1"
+BADGER_DEV_MULTISIG = "0x8421Ec17f2535AD895e1DEdEA966D9F39B224eB3"
 
-WANT = "0x321162Cd933E2Be498Cd2267a90534A804051b11"  ## wBTC
-LP_COMPONENT = "0x97927aBfE1aBBE5429cBe79260B290222fC9fbba"  ## Moo Scream wBTC
-REWARD_TOKEN = "0x321162Cd933E2Be498Cd2267a90534A804051b11"  ## AAVE Token
+WANT = "0x5B5CFE992AdAC0C9D48E05854B2d91C73a003858" ##  Fantom Curve.fi WBTC/renBTC (btcCRV)
+LP_COMPONENT = "0xbdff0c27dd073c119ebcb1299a68a6a92ae607f0"  ## Gauge lp token
+REWARD_TOKEN = "0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83"  ## AAVE Token
 
 PROTECTED_TOKENS = [WANT, LP_COMPONENT, REWARD_TOKEN]
 ## Fees in Basis Points
