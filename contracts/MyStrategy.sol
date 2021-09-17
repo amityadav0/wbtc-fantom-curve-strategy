@@ -13,6 +13,14 @@ import "../interfaces/badger/IController.sol";
 
 import {BaseStrategy} from "../deps/BaseStrategy.sol";
 
+interface IBeefyVaultV6 is IERC20 {
+    function deposit(uint256 amount) external;
+
+    function withdraw(uint256 shares) external;
+
+    function want() external pure returns (address);
+}
+
 contract MyStrategy is BaseStrategy {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using AddressUpgradeable for address;
@@ -21,6 +29,11 @@ contract MyStrategy is BaseStrategy {
     // address public want // Inherited from BaseStrategy, the token the strategy wants, swaps into and tries to grow
     address public lpComponent; // Token we provide liquidity with
     address public reward; // Token we farm and swap to want / lpComponent
+
+    address public constant BEEFY_VAULT =
+        0x97927aBfE1aBBE5429cBe79260B290222fC9fbba;
+    address public constant MOO_WBTC =
+        0x97927aBfE1aBBE5429cBe79260B290222fC9fbba;
 
     // Used to signal to the Badger Tree that rewards where sent to it
     event TreeDistribution(
@@ -73,7 +86,7 @@ contract MyStrategy is BaseStrategy {
 
     /// @dev Balance of want currently held in strategy positions
     function balanceOfPool() public view override returns (uint256) {
-        return 0;
+        return IERC20Upgradeable(lpComponent).balanceOf(address(this));
     }
 
     /// @dev Returns true if this strategy requires tending
@@ -112,10 +125,14 @@ contract MyStrategy is BaseStrategy {
     /// @dev invest the amount of want
     /// @notice When this function is called, the controller has already sent want to this
     /// @notice Just get the current balance and then invest accordingly
-    function _deposit(uint256 _amount) internal override {}
+    function _deposit(uint256 _amount) internal override {
+        IBeefyVaultV6(BEEFY_VAULT).deposit(_amount);
+    }
 
     /// @dev utility function to withdraw everything for migration
-    function _withdrawAll() internal override {}
+    function _withdrawAll() internal override {
+        IBeefyVaultV6(BEEFY_VAULT).withdraw(balanceOfPool());
+    }
 
     /// @dev withdraw the specified amount of want, liquidate from lpComponent to want, paying off any necessary debt for the conversion
     function _withdrawSome(uint256 _amount)
@@ -123,6 +140,7 @@ contract MyStrategy is BaseStrategy {
         override
         returns (uint256)
     {
+        IBeefyVaultV6(BEEFY_VAULT).withdraw(_amount);
         return _amount;
     }
 
