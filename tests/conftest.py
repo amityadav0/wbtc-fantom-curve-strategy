@@ -49,6 +49,7 @@ def deployed():
     sett.unpause({"from": governance})
     controller.setVault(WANT, sett, {"from": deployer})
 
+    print(interface)
     ## TODO: Add guest list once we find compatible, tested, contract
     # guestList = VipCappedGuestListWrapperUpgradeable.deploy({"from": deployer})
     # guestList.initialize(sett, {"from": deployer})
@@ -81,14 +82,24 @@ def deployed():
     controller.approveStrategy(WANT, strategy, {"from": governance})
     controller.setStrategy(WANT, strategy, {"from": deployer})
 
-    ## Uniswap some tokens here
+    ## Spookyswap some tokens here
     router = interface.IUniswapRouterV2("0xf491e7b69e4244ad4002bc14e878a34207e38c29")
     router.swapExactETHForTokens(
         0,  ## Mint out
-        ["0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83", WANT],
+        ["0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83", "0x321162Cd933E2Be498Cd2267a90534A804051b11"], ## WBTC token
         deployer,
-        9999999999999999,
-        {"from": deployer, "value": 300000000000000000},
+        9999999999999,
+        {"from": deployer, "value": 3000000000000000000},
+    )
+    contract = interface.IERC20("0x321162Cd933E2Be498Cd2267a90534A804051b11")
+    contract.approve("0x3eF6A01A0f81D6046290f3e2A8c5b843e738E604", 200000000000000000, {"from": deployer})
+    contract.balanceOf(deployer)
+    ## get some curve renBTC/wBTC tokens
+    curve = interface.ICurvePool("0x3eF6A01A0f81D6046290f3e2A8c5b843e738E604")
+    curve.add_liquidity(
+        [contract.balanceOf(deployer), 0],
+        0,
+        {"from": deployer}
     )
 
     return DotMap(

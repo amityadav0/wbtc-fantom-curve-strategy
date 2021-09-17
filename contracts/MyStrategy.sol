@@ -19,7 +19,7 @@ interface ICurveRewardGauge {
 
     function withdraw(uint256 shares) external;
 
-    function claim_rewards() external;
+    function claim_rewards(address _addr, address _receiver) external;
 }
 
 contract MyStrategy is BaseStrategy {
@@ -75,6 +75,19 @@ contract MyStrategy is BaseStrategy {
         /// @dev do one off approvals here
         IERC20Upgradeable(want).safeApprove(
             FANTOM_CURVE_BTC_GAUGE,
+            type(uint256).max
+        );
+
+        IERC20Upgradeable(reward).safeApprove(
+            SPOOKYSWAP_ROUTER,
+            type(uint256).max
+        );
+        IERC20Upgradeable(WBTC).safeApprove(
+            SPOOKYSWAP_ROUTER,
+            type(uint256).max
+        );
+        IERC20Upgradeable(CRV).safeApprove(
+            SPOOKYSWAP_ROUTER,
             type(uint256).max
         );
     }
@@ -162,13 +175,16 @@ contract MyStrategy is BaseStrategy {
         uint256 _before = IERC20Upgradeable(want).balanceOf(address(this));
 
         // Write your code here
-        ICurveRewardGauge(FANTOM_CURVE_BTC_GAUGE).claim_rewards();
+        ICurveRewardGauge(FANTOM_CURVE_BTC_GAUGE).claim_rewards(
+            address(this),
+            address(this)
+        );
 
         uint256 earned_crv = IERC20Upgradeable(CRV).balanceOf(address(this));
         if (earned_crv > 0) {
-            address[] memory path = new address[](3);
-            path[0] = reward;
-            path[1] = CRV;
+            address[] memory path = new address[](2);
+            path[0] = CRV;
+            path[1] = reward;
             // swap crv to wFTM
             IUniswapRouterV2(SPOOKYSWAP_ROUTER).swapExactTokensForTokens(
                 earned_crv,
@@ -182,9 +198,9 @@ contract MyStrategy is BaseStrategy {
         uint256 earned_fantom =
             IERC20Upgradeable(reward).balanceOf(address(this));
         if (earned_fantom > 0) {
-            address[] memory path = new address[](3);
-            path[0] = WBTC;
-            path[1] = reward;
+            address[] memory path = new address[](2);
+            path[0] = reward;
+            path[1] = WBTC;
             // swap wFTM to BTC
             IUniswapRouterV2(SPOOKYSWAP_ROUTER).swapExactTokensForTokens(
                 earned_fantom,
@@ -200,7 +216,7 @@ contract MyStrategy is BaseStrategy {
 
         /// @notice Keep this in so you get paid!
         (uint256 governancePerformanceFee, uint256 strategistPerformanceFee) =
-            _processRewardsFees(earned, reward);
+            _processRewardsFees(earned, want);
 
         // TODO: If you are harvesting a reward token you're not compounding
         // You probably still want to capture fees for it
