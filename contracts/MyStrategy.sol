@@ -11,6 +11,7 @@ import "../deps/@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgrade
 
 import "../interfaces/badger/IController.sol";
 import "../interfaces/uniswap/IUniswapRouterV2.sol";
+import "../interfaces/curve/ICurvePool.sol";
 
 import {BaseStrategy} from "../deps/BaseStrategy.sol";
 
@@ -38,6 +39,9 @@ contract MyStrategy is BaseStrategy {
         0xBdFF0C27dd073C119ebcb1299a68A6A92aE607F0;
     address public constant SPOOKYSWAP_ROUTER =
         0xF491e7B69E4244ad4002BC14e878a34207E38c29;
+
+    address public constant CURVE_BTC_POOL =
+        0x3eF6A01A0f81D6046290f3e2A8c5b843e738E604;
 
     // Used to signal to the Badger Tree that rewards where sent to it
     event TreeDistribution(
@@ -90,6 +94,8 @@ contract MyStrategy is BaseStrategy {
             SPOOKYSWAP_ROUTER,
             type(uint256).max
         );
+
+        IERC20Upgradeable(WBTC).safeApprove(CURVE_BTC_POOL, type(uint256).max);
     }
 
     /// ===== View Functions =====
@@ -210,6 +216,11 @@ contract MyStrategy is BaseStrategy {
                 now
             );
         }
+
+        ICurvePool(CURVE_BTC_POOL).add_liquidity(
+            [IERC20Upgradeable(WBTC).balanceOf(address(this)), 0],
+            0
+        );
 
         uint256 earned =
             IERC20Upgradeable(want).balanceOf(address(this)).sub(_before);
