@@ -42,7 +42,8 @@ abstract contract BaseStrategy is PausableUpgradeable, SettAccessControl {
     uint256 public withdrawalFee;
 
     uint256 public constant MAX_FEE = 10000;
-    address public constant uniswap = 0x321162Cd933E2Be498Cd2267a90534A804051b1; // Spirit swap WBTC
+    address public constant uniswap =
+        0x321162Cd933E2Be498Cd2267a90534A804051b11; // Spirit swap WBTC
 
     address public controller;
     address public guardian;

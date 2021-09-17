@@ -13,7 +13,7 @@ import "../interfaces/badger/IController.sol";
 
 import {BaseStrategy} from "../deps/BaseStrategy.sol";
 
-interface IBeefyVaultV6 is IERC20 {
+interface IBeefyVaultV6 {
     function deposit(uint256 amount) external;
 
     function withdraw(uint256 shares) external;

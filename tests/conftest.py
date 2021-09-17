@@ -31,7 +31,7 @@ def deployed():
     governance = accounts.at(BADGER_DEV_MULTISIG, force=True)
 
     controller = Controller.deploy({"from": deployer})
-    controller.initialize(BADGER_DEV_MULTISIG, strategist, keeper, BADGER_DEV_MULTISIG)
+    controller.initialize(BADGER_DEV_MULTISIG, strategist, keeper, BADGER_DEV_MULTISIG, {"from": deployer})
 
     sett = SettV3.deploy({"from": deployer})
     sett.initialize(
@@ -43,10 +43,11 @@ def deployed():
         False,
         "prefix",
         "PREFIX",
+        {"from": deployer}
     )
 
     sett.unpause({"from": governance})
-    controller.setVault(WANT, sett)
+    controller.setVault(WANT, sett, {"from": deployer})
 
     ## TODO: Add guest list once we find compatible, tested, contract
     # guestList = VipCappedGuestListWrapperUpgradeable.deploy({"from": deployer})
@@ -65,6 +66,7 @@ def deployed():
         guardian,
         PROTECTED_TOKENS,
         FEES,
+        {"from": deployer}
     )
 
     ## Tool that verifies bytecode (run independently) <- Webapp for anyone to verify
@@ -80,13 +82,13 @@ def deployed():
     controller.setStrategy(WANT, strategy, {"from": deployer})
 
     ## Uniswap some tokens here
-    router = interface.IUniswapRouterV2("0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D")
+    router = interface.IUniswapRouterV2("0xf491e7b69e4244ad4002bc14e878a34207e38c29")
     router.swapExactETHForTokens(
         0,  ## Mint out
-        ["0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", WANT],
+        ["21be370d5312f44cb42ce377bc9b8a0cef1a4c83", WANT],
         deployer,
         9999999999999999,
-        {"from": deployer, "value": 5000000000000000000},
+        {"from": deployer, "value": 300000000000000000},
     )
 
     return DotMap(
