@@ -14,14 +14,6 @@ import "../interfaces/uniswap/IUniswapRouterV2.sol";
 
 import {BaseStrategy} from "../deps/BaseStrategy.sol";
 
-interface IBeefyVaultV6 {
-    function deposit(uint256 amount) external;
-
-    function withdraw(uint256 shares) external;
-
-    function want() external pure returns (address);
-}
-
 interface ICurveRewardGauge {
     function deposit(uint256 amount) external;
 
@@ -39,16 +31,13 @@ contract MyStrategy is BaseStrategy {
     address public lpComponent; // Token we provide liquidity with
     address public reward; // Token we farm and swap to want / lpComponent
 
-    address public constant BEEFY_VAULT =
-        0x97927aBfE1aBBE5429cBe79260B290222fC9fbba;
-    address public constant MOO_WBTC =
-        0x97927aBfE1aBBE5429cBe79260B290222fC9fbba;
-    address public constant CRV = 0x1e4f97b9f9f913c46f1632781732927b9019c68b;
+    address public constant WBTC = 0x321162Cd933E2Be498Cd2267a90534A804051b11;
+    address public constant CRV = 0x1E4F97b9f9F913c46F1632781732927B9019C68b;
 
     address public constant FANTOM_CURVE_BTC_GAUGE =
-        0xbdff0c27dd073c119ebcb1299a68a6a92ae607f0;
+        0xBdFF0C27dd073C119ebcb1299a68A6A92aE607F0;
     address public constant SPOOKYSWAP_ROUTER =
-        0xf491e7b69e4244ad4002bc14e878a34207e38c29;
+        0xF491e7B69E4244ad4002BC14e878a34207E38c29;
 
     // Used to signal to the Badger Tree that rewards where sent to it
     event TreeDistribution(
@@ -177,11 +166,14 @@ contract MyStrategy is BaseStrategy {
 
         uint256 earned_crv = IERC20Upgradeable(CRV).balanceOf(address(this));
         if (earned_crv > 0) {
+            address[] memory path = new address[](3);
+            path[0] = reward;
+            path[1] = CRV;
             // swap crv to wFTM
             IUniswapRouterV2(SPOOKYSWAP_ROUTER).swapExactTokensForTokens(
                 earned_crv,
                 0,
-                [reward, CRV],
+                path,
                 address(this),
                 now
             );
@@ -190,7 +182,17 @@ contract MyStrategy is BaseStrategy {
         uint256 earned_fantom =
             IERC20Upgradeable(reward).balanceOf(address(this));
         if (earned_fantom > 0) {
+            address[] memory path = new address[](3);
+            path[0] = WBTC;
+            path[1] = reward;
             // swap wFTM to BTC
+            IUniswapRouterV2(SPOOKYSWAP_ROUTER).swapExactTokensForTokens(
+                earned_fantom,
+                0,
+                path,
+                address(this),
+                now
+            );
         }
 
         uint256 earned =

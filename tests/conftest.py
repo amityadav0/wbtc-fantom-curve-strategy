@@ -85,7 +85,7 @@ def deployed():
     router = interface.IUniswapRouterV2("0xf491e7b69e4244ad4002bc14e878a34207e38c29")
     router.swapExactETHForTokens(
         0,  ## Mint out
-        ["21be370d5312f44cb42ce377bc9b8a0cef1a4c83", WANT],
+        ["0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83", WANT],
         deployer,
         9999999999999999,
         {"from": deployer, "value": 300000000000000000},
