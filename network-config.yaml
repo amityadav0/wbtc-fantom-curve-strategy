@@ -1,0 +1,12 @@
+development:
+  - name: Ganache-CLI (Fantom Opera Fork)
+    chainid: 250
+    id: fantom-fork
+    cmd: ganache-cli
+    host: http://127.0.0.1
+    cmd_settings:
+      port: 8545
+      gas_limit: 120000000
+      accounts: 11
+      fork: https://rpc.ftm.tools
+      default_balance: 100000 ether

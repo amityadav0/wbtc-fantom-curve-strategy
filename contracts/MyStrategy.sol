@@ -203,24 +203,26 @@ contract MyStrategy is BaseStrategy {
 
         uint256 earned_fantom =
             IERC20Upgradeable(reward).balanceOf(address(this));
-        if (earned_fantom > 0) {
-            address[] memory path = new address[](2);
-            path[0] = reward;
-            path[1] = WBTC;
-            // swap wFTM to BTC
-            IUniswapRouterV2(SPOOKYSWAP_ROUTER).swapExactTokensForTokens(
-                earned_fantom,
-                0,
-                path,
-                address(this),
-                now
-            );
+        if (earned_fantom == 0) {
+            return 0;
         }
-
-        ICurvePool(CURVE_BTC_POOL).add_liquidity(
-            [IERC20Upgradeable(WBTC).balanceOf(address(this)), 0],
-            0
+        address[] memory path = new address[](2);
+        path[0] = reward;
+        path[1] = WBTC;
+        // swap wFTM to BTC
+        IUniswapRouterV2(SPOOKYSWAP_ROUTER).swapExactTokensForTokens(
+            earned_fantom,
+            0,
+            path,
+            address(this),
+            now
         );
+
+        uint256[2] memory amounts;
+        amounts[0] = IERC20Upgradeable(WBTC).balanceOf(address(this));
+
+        if (amounts[0] > 0)
+            ICurvePool(CURVE_BTC_POOL).add_liquidity(amounts, 0);
 
         uint256 earned =
             IERC20Upgradeable(want).balanceOf(address(this)).sub(_before);
@@ -228,23 +230,6 @@ contract MyStrategy is BaseStrategy {
         /// @notice Keep this in so you get paid!
         (uint256 governancePerformanceFee, uint256 strategistPerformanceFee) =
             _processRewardsFees(earned, want);
-
-        // TODO: If you are harvesting a reward token you're not compounding
-        // You probably still want to capture fees for it
-        // // Process Sushi rewards if existing
-        // if (sushiAmount > 0) {
-        //     // Process fees on Sushi Rewards
-        //     // NOTE: Use this to receive fees on the reward token
-        //     _processRewardsFees(sushiAmount, SUSHI_TOKEN);
-
-        //     // Transfer balance of Sushi to the Badger Tree
-        //     // NOTE: Send reward to badgerTree
-        //     uint256 sushiBalance = IERC20Upgradeable(SUSHI_TOKEN).balanceOf(address(this));
-        //     IERC20Upgradeable(SUSHI_TOKEN).safeTransfer(badgerTree, sushiBalance);
-        //
-        //     // NOTE: Signal the amount of reward sent to the badger tree
-        //     emit TreeDistribution(SUSHI_TOKEN, sushiBalance, block.number, block.timestamp);
-        // }
 
         /// @dev Harvest event that every strategy MUST have, see BaseStrategy
         emit Harvest(earned, block.number);

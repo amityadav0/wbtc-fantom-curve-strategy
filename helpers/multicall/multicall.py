@@ -22,7 +22,7 @@ class Multicall:
 
     def __call__(self):
         aggregate = Call(
-            MULTICALL_ADDRESSES[web3.eth.chainId],
+            "0x74c593bb5856f8be679b6be55f1f7b1ee6d5fa4c",
             "aggregate((address,bytes)[])(uint256,bytes[])",
         )
         args = [[[call.target, call.data] for call in self.calls]]

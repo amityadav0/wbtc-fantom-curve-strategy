@@ -1,7 +1,7 @@
 ## Ideally, they have one file with the settings for the strat and deployment
 ## This file would allow them to configure so they can test, deploy and interact with the strategy
 
-BADGER_DEV_MULTISIG = "0xe65012D5d63936BE632CaC94E94241b647F5dC1D"
+BADGER_DEV_MULTISIG = "0xb87Bc90279AeAc4c69Ef4cBc0A236C2a0A8A976d"
 
 WANT = "0x5B5CFE992AdAC0C9D48E05854B2d91C73a003858" ##  Fantom Curve.fi WBTC/renBTC (btcCRV)
 LP_COMPONENT = "0xbdff0c27dd073c119ebcb1299a68a6a92ae607f0"  ## Gauge lp token
