@@ -117,7 +117,7 @@ contract MyStrategy is BaseStrategy {
 
     /// @dev Returns true if this strategy requires tending
     function isTendable() public view override returns (bool) {
-        return true;
+        return balanceOfWant() > 0;
     }
 
     // @dev These are the tokens that cannot be moved except by the vault
@@ -248,6 +248,11 @@ contract MyStrategy is BaseStrategy {
     /// @dev Rebalance, Compound or Pay off debt here
     function tend() external whenNotPaused {
         _onlyAuthorizedActors();
+
+        uint256 toDeposit = balanceOfWant();
+        if (toDeposit > 0) {
+            ICurveRewardGauge(FANTOM_CURVE_BTC_GAUGE).deposit(toDeposit);
+        }
     }
 
     /// ===== Internal Helper Functions =====
