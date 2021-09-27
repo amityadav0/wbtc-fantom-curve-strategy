@@ -1,5 +1,19 @@
 ![Flowchart](https://user-images.githubusercontent.com/26249903/134732793-2c115f3c-0847-459d-a260-76a370668eb5.jpg)
 
+Expected Yield
+
+The expected yield is:(27/9/21)
+
+- Interest on wBTC+renBTC on curve: 0.01%
+- CRV Rewards: 2.17%
+- Fantom Rewards: 9.26%
+
+Total: 11.44%
+
+# Tests
+All tests are passing
+
+![das](https://user-images.githubusercontent.com/26249903/134854656-36f3a48c-7e12-4342-a504-0eba1f500160.png)
 
 # Badger Strategy V1 Brownie Mix
 
