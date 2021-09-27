@@ -1,3 +1,6 @@
+![Flowchart](https://user-images.githubusercontent.com/26249903/134732793-2c115f3c-0847-459d-a260-76a370668eb5.jpg)
+
+
 # Badger Strategy V1 Brownie Mix
 
 - Video Introduction: https://youtu.be/FVbhgPYW_D0
