@@ -1,6 +1,16 @@
 ![Flowchart](https://user-images.githubusercontent.com/26249903/134732793-2c115f3c-0847-459d-a260-76a370668eb5.jpg)
 
-Expected Yield
+# Deposit
+Deposit funds in the Curve Gauge Pool, so that we earn interest as well as rewards
+
+# Harvest
+The Strategy will harvest `crv` and `fantom`, then swap it into `WBTC`, and then deposit them into curve pool to get `wBTC-renBTC`.
+
+# Tend
+If there's any wBTC-renBTC in the strategy, it will be deposited in the pool
+
+
+# Expected Yield
 
 The expected yield is:(27/9/21)
 
